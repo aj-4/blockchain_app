@@ -1,6 +1,8 @@
 import json
 import hashlib
+
 from time import time
+from uuid import uuid4
 
 class Blockchain(object):
 	def __init__(self):
@@ -59,6 +61,38 @@ class Blockchain(object):
 	@property
 	def last_block(self):
 		return self.chain[-1]
+
+	def proof_of_work(self, last_proof):
+		"""
+		PoW Algorithm:
+		-finds num p' such that hash(pp') contains leading 4 zeroes, where p is the previous p
+		-p is the previous proof, and p' is the new proof
+
+		:param last_proof: (int)
+		:return: (int)
+
+		"""
+
+		proof = 0
+		while self.valid_proof(last_proof, proof) is False:
+			proof += 1
+
+		return proof
+
+	@staticmethod
+	def valid_proof(last_proof, proof):
+		"""
+		Validates the Proof: Does hash(last_proof, proof) contain 4 leading zeroes?
+
+		:param last_proof: Previous Proof (int)
+		:param proof: Current Proof (int)
+		:return: True if Correct, False if Not (bool)
+
+		"""
+
+		guess = f'{last_proof}{proof}'.encode()
+		guess_hash = hashlib.sha256(guess).hexdigest()
+		return guess_hash[:4] == "0000"
 
 	@staticmethod
 	def hash(block):
